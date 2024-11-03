@@ -10,47 +10,53 @@ class TuringMachineAB:
 
     def reset(self, input_string):
         """ Inicializa la cinta y el cabezal para una nueva entrada """
-        self.tape = list(input_string) + ["_"]
+        self.tape = list(input_string) + ["_"]  # Usamos '_' como marcador del final de la cinta
         self.head = 0
         self.state = "q0"
 
     def step(self):
         """ Ejecuta un paso de la máquina de Turing """
         if self.state == "q0":
+            # Verifica que haya una 'a' al inicio de cada nuevo patrón 'abb'
             if self.tape[self.head] == 'a':
-                self.tape[self.head] = 'X'
                 self.head += 1
                 self.state = "q1"
+            elif self.tape[self.head] == "_":
+                self.state = "accepted"  # Acepta si está en el final sin más caracteres
             else:
-                self.state = "rejected"
+                self.state = "rejected"  # Rechaza si no es 'a' o '_' en q0
+
         elif self.state == "q1":
+            # Verifica que la 'a' esté seguida de la primera 'b'
             if self.tape[self.head] == 'b':
-                self.tape[self.head] = 'Y'
                 self.head += 1
                 self.state = "q2"
             else:
-                self.state = "rejected"
+                self.state = "rejected"  # Si no encuentra 'b', rechaza la cadena
+        
         elif self.state == "q2":
-            if self.tape[self.head] == '_':
-                self.state = "accepted"
-            elif self.tape[self.head] == 'a':
-                self.state = "q0"
+            # Verifica que la primera 'b' esté seguida de una segunda 'b'
+            if self.tape[self.head] == 'b':
+                self.head += 1
+                self.state = "q0"  # Reinicia para buscar otro 'abb' si existe
             else:
-                self.state = "rejected"
-                
+                self.state = "rejected"  # Si encuentra algo que no es 'b', rechaza la cadena
+
     def run(self, input_string):
         """ Ejecuta la máquina en una cadena de entrada completa """
         self.reset(input_string)
         while self.state not in ["accepted", "rejected"]:
             self.step()
+        
+        # Al finalizar, se acepta la cadena si estamos en el estado 'accepted'
         return self.state == "accepted"
 
 class TuringMachineApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Turing Machine Validator for 'ab'")
+        self.root.title("Turing Machine Validator for 'abb' Pattern")
         
-        self.label = tk.Label(root, text="Ingrese una cadena de 'ab':")
+        self.label = tk.Label(root, text="Ingrese una cadena de 'abb':")
         self.label.pack()
         
         self.entry = tk.Entry(root)
